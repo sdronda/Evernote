@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ContentResolver;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,8 +27,13 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import com.evernote.client.android.EvernoteSession;
+//import com.evernote.client.android.InvalidAuthenticationException;
+
 
 /**
  * A login screen that offers login via email/password.
@@ -43,18 +50,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
+	private static final String LOGTAG = "LoginActivity";
 
 	// UI references.
 	private AutoCompleteTextView mEmailView;
 	private EditText mPasswordView;
+	private Button mEmailSignInButton;
 	private View mProgressView;
 	private View mLoginFormView;
+	private Evernote eve = new Evernote();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-
 		// Set up the login form.
 		mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 		populateAutoComplete();
@@ -73,17 +82,57 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 					}
 				});
 
-		Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+		Log.w(LOGTAG, "email: " + mEmailView.getText());
+		Log.w(LOGTAG, "password: " + mPasswordView.getTextSize());
+		
+		mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
 		mEmailSignInButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				attemptLogin();
+				//Loggearse en Evernote
+				login(mEmailSignInButton);				
 			}
 		});
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mProgressView = findViewById(R.id.login_progress);
 	}
+
+	public void login(View view){		
+		eve.getmEvernoteSession().authenticate(this);
+	}
+	
+	/**
+	 * Called when the control returns from an activity that we launched.
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		// Update UI when oauth activity returns result
+		case EvernoteSession.REQUEST_CODE_OAUTH:
+			if (resultCode == Activity.RESULT_OK) {
+				updateAuthUi();
+			}
+			break;
+		}
+	}
+	
+	/**
+	 * Update the UI based on Evernote authentication state.
+	 */
+	private void updateAuthUi() {
+		// show login button if logged out
+		mEmailSignInButton.setEnabled(!eve.getmEvernoteSession().isLoggedIn());
+
+		// Show logout button if logged in
+		// mLogoutButton.setEnabled(mEvernoteSession.isLoggedIn());
+
+		// disable clickable elements until logged in
+//		mListView.setEnabled(Evernote.getmEvernoteSession().isLoggedIn());
+	}
+	
 
 	private void populateAutoComplete() {
 		if (VERSION.SDK_INT >= 14) {
