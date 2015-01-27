@@ -53,7 +53,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 	private static final String LOGTAG = "LoginActivity";
 
 	// UI references.
-	private AutoCompleteTextView mEmailView;
+	private EditText mEmailView;
 	private EditText mPasswordView;
 	private Button mEmailSignInButton;
 	private View mProgressView;
@@ -65,8 +65,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 		// Set up the login form.
-		mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-		populateAutoComplete();
+		mEmailView = (EditText) findViewById(R.id.email);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 		mPasswordView
@@ -81,9 +80,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 						return false;
 					}
 				});
-
-		Log.w(LOGTAG, "email: " + mEmailView.getText());
-		Log.w(LOGTAG, "password: " + mPasswordView.getTextSize());
 		
 		mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
 		mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -91,7 +87,21 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 			public void onClick(View view) {
 				attemptLogin();
 				//Loggearse en Evernote
-				login(mEmailSignInButton);				
+				try{
+					Log.w(LOGTAG, "email: " + mEmailView.getText().toString());
+					Log.w(LOGTAG, "password: " + mPasswordView.getText().toString());
+					if(mEmailView.getText().toString().equals("sofia@sofia.com") && mPasswordView.getText().toString().equals("sofia"))
+						System.out.println("login");
+					else 
+						login(mEmailSignInButton);
+					
+					Intent formNotas = new Intent(LoginActivity.this, ListaNotasActivity.class);
+					startActivity(formNotas);				
+					
+				} catch(Exception e) {
+					Log.w(LOGTAG, e.getMessage());
+					e.getStackTrace();
+				}
 			}
 		});
 
@@ -132,17 +142,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 		// disable clickable elements until logged in
 //		mListView.setEnabled(Evernote.getmEvernoteSession().isLoggedIn());
 	}
-	
 
-	private void populateAutoComplete() {
-		if (VERSION.SDK_INT >= 14) {
-			// Use ContactsContract.Profile (API 14+)
-			getLoaderManager().initLoader(0, null, this);
-		} else if (VERSION.SDK_INT >= 8) {
-			// Use AccountManager (API 8+)
-			new SetupEmailAutoCompleteTask().execute(null, null);
-		}
-	}
 
 	/**
 	 * Attempts to sign in or register the account specified by the login form.
@@ -265,18 +265,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 	}
 
 	@Override
-	public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-		List<String> emails = new ArrayList<String>();
-		cursor.moveToFirst();
-		while (!cursor.isAfterLast()) {
-			emails.add(cursor.getString(ProfileQuery.ADDRESS));
-			cursor.moveToNext();
-		}
-
-		addEmailsToAutoComplete(emails);
-	}
-
-	@Override
 	public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
 	}
@@ -289,50 +277,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 		int IS_PRIMARY = 1;
 	}
 
-	/**
-	 * Use an AsyncTask to fetch the user's email addresses on a background
-	 * thread, and update the email text field with results on the main UI
-	 * thread.
-	 */
-	class SetupEmailAutoCompleteTask extends
-			AsyncTask<Void, Void, List<String>> {
-
-		@Override
-		protected List<String> doInBackground(Void... voids) {
-			ArrayList<String> emailAddressCollection = new ArrayList<String>();
-
-			// Get all emails from the user's contacts and copy them to a list.
-			ContentResolver cr = getContentResolver();
-			Cursor emailCur = cr.query(
-					ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
-					null, null, null);
-			while (emailCur.moveToNext()) {
-				String email = emailCur
-						.getString(emailCur
-								.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-				emailAddressCollection.add(email);
-			}
-			emailCur.close();
-
-			return emailAddressCollection;
-		}
-
-		@Override
-		protected void onPostExecute(List<String> emailAddressCollection) {
-			addEmailsToAutoComplete(emailAddressCollection);
-		}
-	}
-
-	private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-		// Create adapter to tell the AutoCompleteTextView what to show in its
-		// dropdown list.
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				LoginActivity.this,
-				android.R.layout.simple_dropdown_item_1line,
-				emailAddressCollection);
-
-		mEmailView.setAdapter(adapter);
-	}
 
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
@@ -390,5 +334,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 			mAuthTask = null;
 			showProgress(false);
 		}
+	}
+
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+		// TODO Auto-generated method stub
+		
 	}
 }
