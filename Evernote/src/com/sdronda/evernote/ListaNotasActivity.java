@@ -1,5 +1,14 @@
 package com.sdronda.evernote;
 
+//import java.util.List;
+//
+//import com.evernote.edam.notestore.NoteFilter;
+//import com.evernote.edam.notestore.NoteList;
+//import com.evernote.edam.notestore.NoteStore;
+//import com.evernote.edam.type.Note;
+//import com.evernote.edam.type.NoteSortOrder;
+//import com.evernote.edam.type.Notebook;
+
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -31,4 +40,27 @@ public class ListaNotasActivity extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	/** 
+	 * Retrieve and display a list of the user's notes.
+	 */
+//	private void listNotes() throws Exception {
+//		System.out.println("Listing all notes:");
+//		String authToken;
+//		NoteStore noteStore;
+//		List<Notebook> notebooks = noteStore.listNotebooks(authToken);
+//		for (Notebook notebook : notebooks) {
+//			System.out.println("Notebook: " + notebook.getName());
+//			NoteFilter filter = new NoteFilter();
+//			filter.setNotebookGuid(notebook.getGuid());
+//			filter.setOrder(NoteSortOrder.CREATED.getValue());
+//			filter.setAscending(true);
+//			NoteList noteList = noteStore.findNotes(authToken, filter, 0, 100);
+//			List<Note> notes = noteList.getNotes();
+//			for (Note note : notes) {
+//				System.out.println(" * " + note.getTitle());
+//			}
+//		}
+//		System.out.println();
+//	}
 }

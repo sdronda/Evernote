@@ -90,16 +90,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 				try{
 					Log.w(LOGTAG, "email: " + mEmailView.getText().toString());
 					Log.w(LOGTAG, "password: " + mPasswordView.getText().toString());
-					if(mEmailView.getText().toString().equals("sofia@sofia.com") && mPasswordView.getText().toString().equals("sofia"))
+					if(mEmailView.getText().toString().equals("sofia@sofia.com") 
+							&& mPasswordView.getText().toString().equals("sofia")) {
 						System.out.println("login");
-					else 
-						login(mEmailSignInButton);
+					} else {
+//						onResume();
+					}
 					
 					Intent formNotas = new Intent(LoginActivity.this, ListaNotasActivity.class);
 					startActivity(formNotas);				
 					
 				} catch(Exception e) {
-					Log.w(LOGTAG, e.getMessage());
+					e.getMessage();
 					e.getStackTrace();
 				}
 			}
@@ -109,8 +111,29 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 		mProgressView = findViewById(R.id.login_progress);
 	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		updateAuthUi();
+	}
+	
 	public void login(View view){		
+		Log.w(LOGTAG, "Dentro de login");
 		eve.getmEvernoteSession().authenticate(this);
+	}
+	
+	/**
+	 * Update the UI based on Evernote authentication state.
+	 */
+	private void updateAuthUi() {
+		// show login button if logged out
+		mEmailSignInButton.setEnabled(!eve.getmEvernoteSession().isLoggedIn());
+
+		// Show logout button if logged in
+		// mLogoutButton.setEnabled(mEvernoteSession.isLoggedIn());
+
+		// disable clickable elements until logged in
+//		mListView.setEnabled(Evernote.getmEvernoteSession().isLoggedIn());
 	}
 	
 	/**
@@ -127,20 +150,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 			}
 			break;
 		}
-	}
-	
-	/**
-	 * Update the UI based on Evernote authentication state.
-	 */
-	private void updateAuthUi() {
-		// show login button if logged out
-		mEmailSignInButton.setEnabled(!eve.getmEvernoteSession().isLoggedIn());
-
-		// Show logout button if logged in
-		// mLogoutButton.setEnabled(mEvernoteSession.isLoggedIn());
-
-		// disable clickable elements until logged in
-//		mListView.setEnabled(Evernote.getmEvernoteSession().isLoggedIn());
 	}
 
 
@@ -323,8 +332,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 			if (success) {
 				finish();
 			} else {
-				mPasswordView
-						.setError(getString(R.string.error_incorrect_password));
+				mPasswordView.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
 			}
 		}
@@ -335,8 +343,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 			showProgress(false);
 		}
 	}
-
-
+	
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		// TODO Auto-generated method stub

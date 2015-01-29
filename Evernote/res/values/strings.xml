@@ -6,4 +6,11 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_lista_notas">Listado de Notas</string>
 
+    <string-array name="lista_notas">
+    	<item>Nota1</item>
+    	<item>Nota2</item>
+    	<item>Nota3</item>
+    	<item>Nota4</item>
+ 	</string-array>
+ 
 </resources>
